@@ -39,7 +39,7 @@ def split_las_files():
             las = fh.read()
             type = np.zeros(len(las.x))
             tag = np.zeros(len(las.x))
-            out_arr = np.transpose([las.x, las.y, las.z, las.gps_time, las.intensity, type, tag])
+            out_arr = np.transpose([las.x, las.y, las.z, las.intensity, las.gps_time, type, tag])
             out_arr = sorted(out_arr, key=itemgetter(3))
             out_arr = np.asarray(out_arr)
             
