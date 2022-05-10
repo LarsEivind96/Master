@@ -10,15 +10,49 @@ import open3d as o3d
 from operator import itemgetter
 
 las_path = "C:/Users/LARLIE/School/Master/las_to_pcd_1/"
+las_path = "C:/Users/LARLIE/School/Master/ground_0_500/"
 splitted_txt_path = "C:/Users/LARLIE/School/Master/annotation1/txt_files/"
 json_bbox_path = "C:/Users/LARLIE/Downloads/annotation_1 (6)/annotation_1/ds0/new_ann/"
+bin_path = "C:/Users/LARLIE/School/Master/bin_thinned_0_500/"
 
 class_title_to_num = {"road": 0, "reg_dump": 1, "bus_dump": 2}
 tag_title_to_num = {"normal": 0, "missing_part": 1, "bad_dump": 2, "missing_line": 3}
 
 meta = []
 
-def split_las_files():
+
+def split_las_files_to_bin():
+    if not os.path.exists(bin_path):
+        os.makedirs(bin_path)
+    for filename in os.listdir(las_path):
+        print(filename)
+        with laspy.open(las_path + filename) as fh:
+            las = fh.read()
+            x = las.x - fh.header.offsets[0]
+            y = las.y - fh.header.offsets[1]
+            z = las.z - fh.header.offsets[2]
+            
+            out_arr = np.transpose([x, y, z, las.intensity, las.gps_time])
+            out_arr = sorted(out_arr, key=itemgetter(4))
+            out_arr = np.asarray(out_arr)
+            
+            # Split points
+            n_points = len(out_arr)
+            divisor = int(np.ceil(n_points / 100000))
+            if divisor == 0: divisor = 1
+            new_n_points = int(np.floor(n_points / divisor))
+            print("divisor", divisor)
+            print(len(out_arr))
+            for i in range(divisor):
+                new_arr = out_arr[i * new_n_points : (i+1) * new_n_points]
+                if i == (divisor - 1):
+                    new_arr = out_arr[i * new_n_points : n_points]
+                print(i, len(new_arr))
+                save_path = filename.split(".las")[0] + "_" + str(i) + ".bin"
+                new_arr[:, 0:4].astype(np.float32).tofile(bin_path + save_path)
+
+
+def split_las_files_pnpp():
     i = 1
     
     # Loop through all json bbox files
@@ -40,7 +74,7 @@ def split_las_files():
             type = np.zeros(len(las.x))
             tag = np.zeros(len(las.x))
             out_arr = np.transpose([las.x, las.y, las.z, las.intensity, las.gps_time, type, tag])
-            out_arr = sorted(out_arr, key=itemgetter(3))
+            out_arr = sorted(out_arr, key=itemgetter(4))
             out_arr = np.asarray(out_arr)
             
             # Loop through all bboxes and mark the points within
@@ -170,11 +204,11 @@ def write_new_las(las_file, arr):
     # new_las.write(splitted_las_path + "new_file.las")
     
     
-split_las_files()
+split_las_files_to_bin()
 
-meta_path = "C:/Users/LARLIE/School/Master/annotation1/meta.txt"
+'''meta_path = "C:/Users/LARLIE/School/Master/annotation1/meta.txt"
 # meta = [["1", "2"], ["3", "4"]]
 
 with open(meta_path, 'w') as f:
     for item in meta:
-        f.write("{}\t{}\n".format(item[0], item[1]))
+        f.write("{}\t{}\n".format(item[0], item[1]))'''

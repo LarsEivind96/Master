@@ -143,11 +143,9 @@ def translate_box_position(file_data, x, y, z):
 
 
 # translate_box_position(data, -16, -60.002, -143.04)
-read_point_cloud()
+#read_point_cloud()
 
-print_annotation_statistics()
-
-
+#print_annotation_statistics()
 
 
 
@@ -159,19 +157,21 @@ print_annotation_statistics()
 
 
 
-'''def bin_to_pcd():
+
+
+def bin_to_pcd():
     """file = open(bin_path, "rb")
     print(list(file.read(50)))
     file.close"""
     # Load binary point cloud
-    bin_pcd = np.fromfile(bin_path, dtype=np.float32)
+    bin_pcd = np.fromfile("10__thin_ground_points_1.bin", dtype=np.float32)
 
     # Reshape and drop reflection values
     points = bin_pcd.reshape((-1, 4))[:, 0:4]
     print(points[0:10])
     
     print("\n\n")
-    with open (bin_path, "rb") as f:
+    with open ("10__thin_ground_points_1.bin", "rb") as f:
         list_pcd = []
         size_float = 4
         byte = f.read(size_float*4)
@@ -185,9 +185,9 @@ print_annotation_statistics()
     v3d = o3d.utility.Vector3dVector
     pcd.points = v3d(np_pcd)
     o3d.io.write_point_cloud("copy_of_fragment.pcd", pcd)
-    return'''
+    return
 
-
+bin_to_pcd()
 
 
 
