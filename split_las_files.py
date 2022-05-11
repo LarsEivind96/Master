@@ -12,7 +12,9 @@ from operator import itemgetter
 las_path = "C:/Users/LARLIE/School/Master/las_to_pcd_1/"
 las_path = "C:/Users/LARLIE/School/Master/ground_0_500/"
 splitted_txt_path = "C:/Users/LARLIE/School/Master/annotation1/txt_files/"
+splitted_txt_local_path = "C:/Users/LARLIE/School/Master/annotation1/txt_local_files/"
 json_bbox_path = "C:/Users/LARLIE/Downloads/annotation_1 (6)/annotation_1/ds0/new_ann/"
+json_bbox_local_coords_path = "C:/Users/LARLIE/Downloads/annotation_1 (6)/annotation_1/ds0/ann/"
 bin_path = "C:/Users/LARLIE/School/Master/bin_thinned_0_500/"
 
 class_title_to_num = {"road": 0, "reg_dump": 1, "bus_dump": 2}
@@ -56,25 +58,29 @@ def split_las_files_pnpp():
     i = 1
     
     # Loop through all json bbox files
-    for filename in os.listdir(json_bbox_path):
+    for filename in os.listdir(json_bbox_local_coords_path):
         print(filename)
         '''i += 1
         if i == 2: continue
         if i > 3: return'''
-        annot_file = open(json_bbox_path + filename)
+        annot_file = open(json_bbox_local_coords_path + filename)
         annot_data = json.load(annot_file)
         # Fetch list of bboxes
         bbox_list = fetch_bbox_coords(annot_data)
         if len(bbox_list) > 0:
             print("Different bump classes: ", np.asarray(bbox_list, dtype=object)[:, 3])
         
-        las_filename = filename.split(".json")[0] + ".las"
+        las_filename = filename.split("_2022")[0] + ".las"
         with laspy.open(las_path + las_filename) as fh:
             las = fh.read()
             type = np.zeros(len(las.x))
             tag = np.zeros(len(las.x))
-            out_arr = np.transpose([las.x, las.y, las.z, las.intensity, las.gps_time, type, tag])
-            out_arr = sorted(out_arr, key=itemgetter(4))
+            
+            x = las.x - fh.header.offsets[0]
+            y = las.y - fh.header.offsets[1]
+            z = las.z - fh.header.offsets[2]
+            out_arr = np.transpose([x, y, z, las.intensity, type, tag, las.gps_time])
+            out_arr = sorted(out_arr, key=itemgetter(6))
             out_arr = np.asarray(out_arr)
             
             # Loop through all bboxes and mark the points within
@@ -92,53 +98,29 @@ def split_las_files_pnpp():
                 
                 for i in range(len(out_arr)):
                     if contains_points[i] and (out_arr[i][2] > min_z and out_arr[i][2] < max_z):
-                        out_arr[i][5] = class_num
-                        out_arr[i][6] = tag_num
+                        out_arr[i][4] = class_num
+                        out_arr[i][5] = tag_num
                         # print(str(class_num) + " - point. Number: " + str(i))
-                
-                '''points_inside_box = out_arr[contains_points]
-                
-                # Check if points are within z boundaries
-                bound_z = np.logical_and(points_inside_box[:, 2] > min_z, points_inside_box[:, 2] < max_z)
-                points_inside_box = points_inside_box[bound_z]'''
-            write_new_txt(splitted_txt_path + filename.split('.las')[0], out_arr)
-                
-                
-                
-
-        
-    
-    '''for filename in os.listdir(las_path):
-        i += 1
-        if i == 100:
-            return
-        print(filename)
-        with laspy.open(las_path + filename) as fh:
-            las = fh.read()
-            # TODO: Save time and intensity variable here as well
-            out_arr = np.transpose([las.x, las.y, las.z, las.gps_time, las.intensity])
-            out_arr = sorted(out_arr, key=itemgetter(3))
-            out_arr = np.asarray(out_arr)
-            # print(out_arr[0:10])
-            write_new_txt(splitted_txt_path + filename.split('.las')[0], out_arr)
-            # write_new_las(las, out_arr)'''
+            write_new_txt(splitted_txt_local_path + las_filename.split('.las')[0], out_arr)
+            
 
 
 def write_new_txt(filename, arr):
     n_points = len(arr)
-    divisor = int(np.floor(n_points / 16384))
-    print(divisor)
+    divisor = int(np.ceil(n_points / 16384))
+    print("divisor", divisor)
     if divisor == 0: divisor = 1
     new_n_points = int(np.floor(n_points / divisor))
-    for i in range(divisor - 1):
+    for i in range(divisor):
         new_arr = arr[i * new_n_points : (i+1) * new_n_points]
         save_path = filename + "_" + str(i) + ".txt"
+        print(save_path)
         if i == (divisor - 1):
             new_arr = arr[i * new_n_points : n_points]
-        if 1 in new_arr[:, 5]:
+        if 1 in new_arr[:, 4]:
             #print("Regular dump here: " + str(i))
             meta.append(["reg_dump", save_path])
-        if 2 in new_arr[:, 5]:
+        if 2 in new_arr[:, 4]:
             #print("Bus dump here: " + str(i))
             meta.append(["bus_dump", save_path])
         #if 1 in new_arr[:, 6] or 2 in new_arr[:, 6] or 3 in new_arr[:, 6]:
@@ -204,11 +186,11 @@ def write_new_las(las_file, arr):
     # new_las.write(splitted_las_path + "new_file.las")
     
     
-split_las_files_to_bin()
-
-'''meta_path = "C:/Users/LARLIE/School/Master/annotation1/meta.txt"
+# split_las_files_to_bin()
+split_las_files_pnpp()
+meta_path = "C:/Users/LARLIE/School/Master/annotation1/meta_local.txt"
 # meta = [["1", "2"], ["3", "4"]]
 
 with open(meta_path, 'w') as f:
     for item in meta:
-        f.write("{}\t{}\n".format(item[0], item[1]))'''
+        f.write("{}\t{}\n".format(item[0], item[1]))
