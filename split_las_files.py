@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from matplotlib import path
 import open3d as o3d
 from operator import itemgetter
+import shutil
 
 las_path = "C:/Users/LARLIE/School/Master/las_to_pcd_1/"
 las_path = "C:/Users/LARLIE/School/Master/ground_0_500/"
@@ -15,13 +16,24 @@ splitted_txt_path = "C:/Users/LARLIE/School/Master/annotation1/txt_files/"
 splitted_txt_local_path = "C:/Users/LARLIE/School/Master/annotation1/txt_local_files/"
 json_bbox_path = "C:/Users/LARLIE/Downloads/annotation_1 (6)/annotation_1/ds0/new_ann/"
 json_bbox_local_coords_path = "C:/Users/LARLIE/Downloads/annotation_1 (6)/annotation_1/ds0/ann/"
-bin_path = "C:/Users/LARLIE/School/Master/bin_thinned_0_500/"
+bin_path = "C:/Users/LARLIE/School/Master/PointRCNNdata/bin_thinned_0_500/"
+labeled_bin_path = "C:/Users/LARLIE/School/Master/PointRCNNdata/labeled_bin_files/"
+label_path_KITTI_format = "C:/Users/LARLIE/School/Master/PointRCNNdata/prcnn_label_txt/"
 
 class_title_to_num = {"road": 0, "reg_dump": 1, "bus_dump": 2}
 tag_title_to_num = {"normal": 0, "missing_part": 1, "bad_dump": 2, "missing_line": 3}
 
 meta = []
 
+
+def move_labeled_bin_to_separate_dir():
+    if not os.path.exists(labeled_bin_path):
+        os.makedirs(labeled_bin_path)
+    for filename in os.listdir(label_path_KITTI_format):
+        base = filename.split(".txt")[0]
+        bin_name = base + ".bin"
+        shutil.copy2(bin_path + bin_name, labeled_bin_path)
+        
 
 def split_las_files_to_bin():
     if not os.path.exists(bin_path):
@@ -187,10 +199,12 @@ def write_new_las(las_file, arr):
     
     
 # split_las_files_to_bin()
-split_las_files_pnpp()
+# split_las_files_pnpp()
+
+move_labeled_bin_to_separate_dir()
 meta_path = "C:/Users/LARLIE/School/Master/annotation1/meta_local.txt"
 # meta = [["1", "2"], ["3", "4"]]
-
+'''
 with open(meta_path, 'w') as f:
     for item in meta:
-        f.write("{}\t{}\n".format(item[0], item[1]))
+        f.write("{}\t{}\n".format(item[0], item[1]))'''
