@@ -2,9 +2,7 @@ import os
 import json
 import laspy
 import numpy as np
-from matplotlib import pyplot as plt
 from matplotlib import path
-import open3d as o3d
 from operator import itemgetter
 import random
 
@@ -21,9 +19,9 @@ Set splittet_txt_path to where you want the txt files to be stored.
 '''
 
 las_path = "C:/Users/LARLIE/School/Master/ground_0_500/"
-json_bbox_path = "C:/Users/LARLIE/Downloads/annotation_1 (6)/annotation_1/ds0/ann/"
-splitted_txt_path = "C:/Users/LARLIE/School/Master/annotation2/txt_local_files/"
-train_test_split_path = "C:/Users/LARLIE/School/Master/annotation2/train_test_split/"
+json_bbox_path = "C:/Users/LARLIE/Downloads/annotation_2/ds0/ann/"
+splitted_txt_path = "C:/Users/LARLIE/School/Master/annotation2/pnpp/txt/"
+train_test_split_path = "C:/Users/LARLIE/School/Master/annotation2/pnpp/train_test_split/"
 meta_path = "C:/Users/LARLIE/School/Master/annotation2/meta.txt"
 
         
@@ -54,6 +52,9 @@ def split_las_files_pnpp():
             print("Different bump classes: ", np.asarray(bbox_list, dtype=object)[:, 3])
         
         las_filename = filename.split("_2022")[0] + ".las"
+        las_path = "C:/Users/LARLIE/School/Master/ground_0_500/"
+        if int(filename.split('__')[0]) > 500:
+            las_path = "C:/Users/LARLIE/School/Master/ground_501_1000/"
         with laspy.open(las_path + las_filename) as fh:
             las = fh.read()
             type = np.zeros(len(las.x))

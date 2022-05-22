@@ -66,12 +66,13 @@ def count_point_cats():
     return
 
 def read_bin_file():
-    lidar_file = os.path.join(new_bin)
+    lidar_file = os.path.join("C:/Users/LARLIE/School/Master/annotation2/prcnn/bin/3__thin_ground_points_1.bin")
     assert os.path.exists(lidar_file)
     arr = np.fromfile(lidar_file, dtype=np.float32)
     print("np array of binary file", arr)
     arr = arr.reshape(-1, 4)
     print("np array of binary file", arr)
+    np.savetxt("3__thin_ground_points_1" + ".txt", arr)
 
 def write_bin_file():
     for filename in os.listdir(las_path):
@@ -95,8 +96,8 @@ def write_bin_file():
 
 #write_bin_file()
 #read_bin_file()
-count_point_cats()
-
+#count_point_cats()
+read_bin_file()
 '''test = ['hei', 'hallo', 'damane']
 with open("test.txt", 'w') as f:
     for word in test:

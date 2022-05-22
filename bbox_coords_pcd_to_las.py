@@ -4,7 +4,7 @@ import laspy
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import path
-# import open3d as o3d
+import open3d as o3d
 
 json_folder_path = "C:/Users/LARLIE/Downloads/annotation_1 (6)/annotation_1/ds0/ann/"
 new_json_folder_path = "C:/Users/LARLIE/Downloads/annotation_1 (6)/annotation_1/ds0/new_ann/"
